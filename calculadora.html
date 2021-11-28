@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Calculadora</title>
+	<style>
+		 body {
+			 background-color: #00FFFF;
+			 font-family: tahoma;
+			 font-weight: 600;
+			 margin: auto;
+			 line-height: 0.8;
+			 font-size: 35pt;
+		}
+		.valor {
+			font-size: 90pt;
+			display: inline;
+		}
+		.dados {
+			background-color: #FFFFFF;
+			margin-top: 15%;
+			padding: 30px;
+		}
+		.entrada {
+			/* border-style: none; */
+			font-size: 90pt;
+			/* border: 3pt solid #000000; */
+			width: 100%;
+			border: none;
+			background-color: #00FFFF;
+			font-weight: 600;
+			font-family: tahoma;
+		}
+	</style>
+</head>
+<body onload="funcbd()">
+	<div onclick="abilitar(event)">
+		<p>1 - Conta Bradesco:</p>
+		<input id="idnA" class="entrada" class="valor" readonly onkeypress="ifunckeypress(event)"></input>
+		<p>2 - Conta Banco do Brasil:</p>
+		<input id="idnB" class="entrada" class="valor" readonly onkeypress="ifunckeypress(event)"></input>
+		<p>3 - Dinheiro em casa:</p>
+		<input id="idnC" class="entrada" class="valor" readonly onkeypress="ifunckeypress(event)"></input>
+		<p>4 - Cartão C. Nubank:</p>
+		<input pattern="[0-9]" id="idnD" class="entrada" class="valor" readonly onkeypress="ifunckeypress(event)"></input>
+		<p>5 - Cartão C. Bradesco</p>
+		<input id="idnE" class="entrada" class="valor" readonly onkeypress="ifunckeypress(event)"></input>
+	</div>
+	<script>
+		var elemento = "";
+		var x = 0, y = 0, z = 0, w = 0;
+		var xdados = [];
+		var datual = ["07", "01", "2022"];
+		// var datual = new Date();
+		// datual = [("00" + datual.getDate()).slice(-2), ("00" + (datual.getMonth() + 1)).slice(-2), datual.getFullYear()];
+		
+		function abilitar(event) {
+			if (event.clientY < 265) {
+				z = 0;
+				elemento = document.getElementById("idnA");
+				document.getElementById("idnB").style.backgroundColor = "#00FFFF";
+				document.getElementById("idnC").style.backgroundColor = "#00FFFF";
+				document.getElementById("idnD").style.backgroundColor = "#00FFFF";
+				document.getElementById("idnE").style.backgroundColor = "#00FFFF";
+			}
+			else if (event.clientY < 550) {
+				z = 1;
+				document.getElementById("idnA").style.backgroundColor = "#00FFFF";
+				elemento = document.getElementById("idnB");
+				document.getElementById("idnC").style.backgroundColor = "#00FFFF";
+				document.getElementById("idnD").style.backgroundColor = "#00FFFF";
+				document.getElementById("idnE").style.backgroundColor = "#00FFFF";
+			}
+			else if (event.clientY < 830) {
+				z = 2;
+				document.getElementById("idnA").style.backgroundColor = "#00FFFF";
+				document.getElementById("idnB").style.backgroundColor = "#00FFFF";
+				elemento = document.getElementById("idnC");
+				document.getElementById("idnD").style.backgroundColor = "#00FFFF";
+				document.getElementById("idnE").style.backgroundColor = "#00FFFF";
+			}
+			else if (event.clientY < 1140) {
+				z = 3;
+				document.getElementById("idnA").style.backgroundColor = "#00FFFF";
+				document.getElementById("idnB").style.backgroundColor = "#00FFFF";
+				document.getElementById("idnC").style.backgroundColor = "#00FFFF";
+				elemento = document.getElementById("idnD");
+				document.getElementById("idnE").style.backgroundColor = "#00FFFF";
+			}
+			else if (event.clientY < 1430) {
+				z = 8;
+				document.getElementById("idnA").style.backgroundColor = "#00FFFF";
+				document.getElementById("idnB").style.backgroundColor = "#00FFFF";
+				document.getElementById("idnD").style.backgroundColor = "#00FFFF";
+				document.getElementById("idnC").style.backgroundColor = "#00FFFF";
+				elemento = document.getElementById("idnE");
+			}
+
+			elemento.removeAttribute("readonly");
+			elemento.focus();
+			var strtemp = elemento.value;
+			elemento.value = "";
+			elemento.value = strtemp;
+			elemento.style.backgroundColor = "#FFFFFF";
+			// alert(event.clientY);
+		}
+		
+		function ifunckeypress(event) {
+			x = event.which || event.keyCode;
+			y = elemento.value;
+			
+			if (x == 13) { //tecla ENTER
+				if (z < 3) {
+					y = y.replace("R$", "");
+				} else {
+					y = y.slice(y.indexOf(".") + 3);
+					y = xdados[z].replace("p", "") + y;
+				}
+				
+				try {
+					y = eval(y);
+
+					if (xdados[z].slice(-1) == "p") { // se o gasto tiver a letra P, depois de somar recebe ela novamente
+						xdados[z] = y.toFixed(2) + "p";
+					} else {
+						xdados[z] = y.toFixed(2);
+					}
+				}
+				catch {
+					y = parseFloat(xdados[z].replace("p", ""));
+				}
+				
+				if (z > 2) {
+					if (datual[0] < 8 && xdados[z].slice(-1) != "p") {
+						xdados[z] += "p";
+					} else if (datual[0] > 7 && xdados[z].slice(-1) == "p") {
+						xdados[z] = xdados[z].slice(0, -1);
+					}
+
+					y += "+" + xdados[z + 2];
+					
+					try {
+						y = eval(y);
+					} catch {
+						y = 0;
+					}
+					
+					if (elemento.value.slice(-1) == "L" || elemento.value.slice(-1) == "l") { //tecla L(l)
+						var tlimite = prompt("Digite o novo limite do cartão.\nO limite total do cartão atual é de: R$ " + xdados[z + 1]);
+						
+						try {
+							tlimite = eval(tlimite);
+							xdados[z + 1] = tlimite.toFixed(2);
+						} catch {
+							
+						}
+
+					} else if (elemento.value.slice(-1) == "P" || elemento.value.slice(-1) == "p") { //tecla P(p)
+						var arvalor = [], arparc = [];
+
+						if (xdados[z + 2] == "") {
+							arvalor = [];
+						} else {
+							arvalor = xdados[z + 2].split("+");
+						}
+						
+						if (xdados[z + 3] == "") {
+							arparc = [];
+						} else {
+							arparc = xdados[z + 3].split("+");
+						}
+
+						var vpaga = prompt("Digite o valor do pagamento parcelado.");
+
+						if (vpaga == "") {
+							vpaga = "0.00";
+						}
+
+						var qtprest = prompt("Digite a quantidade de parcelas", "00");
+						var dparc = prompt("Digite a data a compra.", datual.join("/"));
+
+						arvalor[arvalor.length] = vpaga;
+						arparc[arparc.length] = qtprest;
+						xdados[z + 2] = arvalor.join("+");
+						xdados[z + 3] = arparc.join("+");
+						
+						if (xdados[z + 4] == ""){
+							xdados[z + 4] = dparc;
+						} else {
+							xdados[z + 4] = xdados[z + 4] + "+" + dparc;
+						}
+
+					} else if (elemento.value.slice(-1) == "V" || elemento.value.slice(-1) == "v") { //tecla V(v)
+						var pdata = [], qdata = [];
+						var visual = "";
+						pdata = xdados[z + 2].split("+");
+						qdata = xdados[z + 3].split("+");
+
+						for (var i = 0; i < pdata.length; i++) {
+							try {
+								w = eval(pdata[i]);
+								visual += "R$ " + w.toFixed(2) + " = " + qdata[i] + "\n";
+							} catch {
+
+							}
+						}
+
+						w = xdados[z + 1] - limiterestcart(pdata, qdata, xdados[z].replace("p", ""));
+						w = "\n\nLimite restante do cartão:\n\nR$ " + w.toFixed(2);
+
+						if (visual != "") {
+							alert("As compras parceladas estão como: Valor = Qtidade Parcelas\n\n" + visual	+ w);
+						} else {
+							alert("Não existem compras parceladas!" + w);
+						}
+					}
+				}
+				
+				elemento.value = "R$ " + y.toFixed(2);
+				elemento.setAttribute("readonly", true);
+				elemento.blur();
+				elemento.style.backgroundColor = "#00FFFF";
+				localStorage.setItem("dados", xdados.join(";"));
+				funcbd();
+			} 
+
+		}
+
+		function limiterestcart(arrval1, arrval2, ival3) {
+			var itemp = 0;
+
+			for (var i = 0; i < arrval1.length; i++) {
+				itemp += arrval1[i] * arrval2[i];
+			}
+
+			try {
+				itemp = eval(itemp + "+" + ival3);
+			} catch {
+				itemp = 0;
+			}
+
+			return itemp.toFixed(2);
+		}
+		
+		function reduzirparc(c) {
+			var adparc = [], aqparc = [], tmpdata = [];
+			var i = 0, iano = 0;
+			aqparc = xdados[6 + c].split("+");
+			adparc = xdados[7 + c].split("+");
+
+			for (i = 0; i < adparc.length; i++) { // separar datas em um array
+				tmpdata += adparc[i].split("/").toString() + ",";
+			}
+			
+			tmpdata = tmpdata.split(",");
+			tmpdata.pop();
+
+			if (datual[0] > 7) { 
+				for (i = 1; i < tmpdata.length; i += 3) { // verificar se data atual é menor que data parcela
+					z = (i - 1) / 3;
+
+					if (datual[2] > tmpdata[i + 1]) { // acrescenta 12 meses se o ano atual for maior que o ano da parcela
+						iano = eval(datual[1] + "+ 12");
+						tmpdata[i + 1] = eval(tmpdata[i + 1]) + 1;
+					} else {
+						iano = datual[1];
+					}
+
+					if (iano - eval(tmpdata[i] + "+ 1") > 0) { // subtrai uma parcela e mês parcela
+						aqparc[z] -= eval(iano - tmpdata[i]);
+						tmpdata[i] = eval(datual[1]);
+					}
+
+					if (datual[1] - eval(tmpdata[i] + "+ 1") == 0) { // aumenta o mês parcela e subtrai parcela
+							aqparc[z] = eval(aqparc[z] - 1);
+							tmpdata[i] = eval(tmpdata[i]) + 1;
+						}
+				}
+				
+				adparc[z] = ("00" + tmpdata[i - 1]).slice(-2) + "/" + ("00" + tmpdata[i]).slice(-2) + "/" + tmpdata[i + 1];
+			}
+						
+			tmpdata = xdados[5 + c].split("+");
+			
+			for (i = 0; i < aqparc.length; i++) { // remove valor, qtidade e data parcela que não há mais quantidade de parcela
+				if (aqparc[i] < 1) {
+					aqparc.splice(i, 1);
+					adparc.splice(i, 1);
+					tmpdata.splice(i, 1);
+				}
+			}
+
+			if (datual[0] < 8) { // se acabou de virar o mês, gerar uma parcela do dinheiro gasto
+				i = eval(datual[1] - 1);
+				iano = datual[2];
+
+				if (i < 1) {
+					i = 12;
+					iano = eval(datual[2] - 1);
+				}
+
+				if (xdados[3 + c].replace("p", "") > 0 && xdados[3 + c].slice(-1) != "p") { // se houver um valor de compra avulsa
+					tmpdata.push(xdados[3 + c]);
+					xdados[3 + c] = "0.00p";
+					aqparc.push("1");
+					adparc.push("01/" + i + "/" + iano);
+				}
+			} else if (datual[0] > 7 && xdados[3 + c].slice(-1) == "p") {
+				xdados[3 + c] = xdados[3 + c].slice(0, -1);
+			}
+			
+			xdados[5 + c] = tmpdata.join("+");
+			xdados[6 + c] = aqparc.join("+");
+			xdados[7 + c] = adparc.join("+");
+		}
+
+		function funcbd() {
+			xdados = localStorage.getItem("dados");
+			
+			if (xdados == null) {
+				xdados = ("0.00;0.00;0.00;0.00;0.00;;;;0.00;0.00;;;").split(";");
+			} else {
+				xdados = xdados.split(";");
+			}
+
+			reduzirparc(0);
+			reduzirparc(5);
+			localStorage.setItem("dados", xdados.join(";"));
+			
+			document.getElementById("idnA").value = "R$ " + xdados[0];
+			document.getElementById("idnB").value = "R$ " + xdados[1];
+			document.getElementById("idnC").value = "R$ " + xdados[2];
+
+			try {
+				y = eval(xdados[3].replace("p", "") + "+" + xdados[5]);
+			} catch {
+				y = eval(xdados[3].replace("p", ""));
+			}
+			
+			document.getElementById("idnD").value = "R$ " + y.toFixed(2);
+
+			try {
+				y = eval(xdados[8].replace("p", "") + "+" + xdados[10]);
+			} catch {
+				y = eval(xdados[8].replace("p", ""));
+			}
+
+			document.getElementById("idnE").value = "R$ " + y.toFixed(2);
+		}
+	</script>
+</body>
+</html>
