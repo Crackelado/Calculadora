@@ -42,7 +42,7 @@
 		<input id="idnC" class="entrada" class="valor" readonly onkeypress="ifunckeypress(event)"></input>
 		<p>4 - Cartão C. Nubank:</p>
 		<input pattern="[0-9]" id="idnD" class="entrada" class="valor" readonly onkeypress="ifunckeypress(event)"></input>
-		<p>5 - Cartão C. Meliuz:</p>
+		<p>5 - Cartão C. Bradesco:</p>
 		<input id="idnE" class="entrada" class="valor" readonly onkeypress="ifunckeypress(event)"></input>
 	</div>
 	<script>
@@ -109,9 +109,24 @@
 			y = elemento.value;
 			
 			if (x == 13) { //tecla ENTER
-				if (z < 3) {
+				if (y.slice(-1) == "d" || y.slice(-1) == "D") { //Configurar dados armazenados em qualquer um dos campos
+
+					try {
+						xdados = prompt("Dados na memória\nOK salva novos dados", xdados.join(";")).split(";");
+					}
+					catch {}
+					
+					if (xdados == null || xdados.length < 14) {
+						xdados = localStorage.getItem("dados")
+						xdados = xdados.split(";");
+					}
+
+					localStorage.setItem("dados", xdados.join(";"));
+				}
+
+				if (z < 3) { // Remove simbolo "R$"
 					y = y.replace("R$", "");
-				} else {
+				} else { // Pegar depois das 2 primeiras casas decimais do campo
 					y = y.slice(y.indexOf(".") + 3);
 					y = xdados[z].replace("p", "") + y;
 				}
@@ -313,9 +328,16 @@
 			xdados = localStorage.getItem("dados");
 			
 			if (xdados == null) {
-				xdados = ("0.00;0.00;0.00;0.00;0.00;;;;0.00;0.00;;;").split(";");
+				xdados = ("0.00;0.00;0.00;0.00;0.00;;;;0.00;0.00;;;;").split(";");
 			} else {
 				xdados = xdados.split(";");
+				x = 14 - xdados.length;
+				
+				if (xdados.length < 14) {
+					for (i = 0; i < x; i++) {
+						xdados.push("");
+					}
+				}
 			}
 
 			reduzirparc(0);
