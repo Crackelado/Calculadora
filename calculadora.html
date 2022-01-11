@@ -49,9 +49,9 @@
 		var elemento = "";
 		var x = 0, y = 0, z = 0, w = 0;
 		var xdados = [];
-		// var datual = ["08", "01", "2022"];
-		var datual = new Date();
-		datual = [("00" + datual.getDate()).slice(-2), ("00" + (datual.getMonth() + 1)).slice(-2), datual.getFullYear()];
+		var datual = ["07", "01", "2022"];
+		// var datual = new Date();
+		// datual = [("00" + datual.getDate()).slice(-2), ("00" + (datual.getMonth() + 1)).slice(-2), datual.getFullYear()];
 		
 		function abilitar(event) {
 			if (event.clientY < 265) {
@@ -169,7 +169,8 @@
 							
 						}
 
-					} else if (elemento.value.slice(-1) == "P" || elemento.value.slice(-1) == "p") { //tecla P(p)
+					} 
+					else if (elemento.value.slice(-1) == "P" || elemento.value.slice(-1) == "p") { //tecla P(p)
 						var arvalor = [], arparc = [];
 
 						if (xdados[z + 2] == "") {
@@ -204,7 +205,8 @@
 							xdados[z + 4] = xdados[z + 4] + "+" + dparc;
 						}
 
-					} else if (elemento.value.slice(-1) == "V" || elemento.value.slice(-1) == "v") { //tecla V(v)
+					} 
+					else if (elemento.value.slice(-1) == "V" || elemento.value.slice(-1) == "v") { //tecla V(v)
 						var pdata = [], qdata = [];
 						var visual = "";
 						pdata = xdados[z + 2].split("+");
@@ -227,6 +229,23 @@
 						} else {
 							alert("Não existem compras parceladas!" + w);
 						}
+					} 
+					else if (elemento.value.slice(-1) == "F" || elemento.value.slice(-1) == "f") { //tecla F(f)
+						var fechamento = xdados[13].split("+");
+						var datafecha = prompt("Digite a data de fechamento do cartão.\nA data atual é: " + fechamento[parseInt(z/8)], fechamento[parseInt(z/8)]);
+
+						try {
+							datafecha = new Date(datafecha.split("/").reverse().join("-"));
+						} catch {
+							datafecha = new Date();
+						}
+
+						try {
+							fechamento[parseInt(z/8)] = datafecha.toISOString().slice(0, 10).split("-").reverse().join("/");
+						} catch {
+						}
+
+						xdados[13] = fechamento.join("+");
 					}
 				}
 				
@@ -273,16 +292,21 @@
 				z = (i - 1) / 3;
 
 				if (datual[0] > 7) { 
-					if (datual[2] > tmpdata[i + 1]) { // acrescenta 12 meses se o ano atual for maior que o ano da parcela
-						iano = eval(datual[1]) + 12;
-						tmpdata[i + 1] = eval(tmpdata[i + 1]) + 1;
-					} else {
-						iano = datual[1];
-					}
+					// if (datual[2] > tmpdata[i + 1]) { // acrescenta 12 meses se o ano atual for maior que o ano da parcela
+					// 	iano = eval(datual[1]) + 12;
+					// 	tmpdata[i + 1] = eval(tmpdata[i + 1]) + 1;
+					// } else {
+					// 	iano = datual[1];
+					// }
 
-					if (iano - eval(tmpdata[i] + "+ 1") > -1) { // subtrai uma parcela e mês parcela
-						aqparc[z] -= eval(iano - tmpdata[i]);
+					// if (iano - eval(tmpdata[i] + "+ 1") > -1) { // subtrai uma parcela e mês parcela
+					// 	aqparc[z] -= eval(iano - tmpdata[i]);
+					// 	tmpdata[i] = eval(datual[1]);
+					// }
+					if (comparardatas("", retornardatavalida(adparc[z], 1))) { // subtrai uma parcela e mês parcela
+						aqparc[z] -= eval(((datual[2] - tmpdata[i + 1]) * 12) + (datual[1] - tmpdata[i]));
 						tmpdata[i] = eval(datual[1]);
+						tmpdata[i + 1] = eval(datual[2]);
 					}
 
 				}
@@ -299,22 +323,31 @@
 					tmpdata.splice(i, 1);
 				}
 			}
+			
+			i = xdados[13].split("+");
+			z = i[eval(c / 5)].split("/");
+			
+			if (comparardatas("", retornardatavalida(z.join("/"), 0))) { // gera parcela com uma data de fechamento do cartão
 
-			if (datual[0] < 8) { // se acabou de virar o mês, gerar uma parcela do dinheiro gasto
-				i = eval(datual[1] - 1);
-				iano = datual[2];
+			// if (datual[0] < 8) { // se acabou de virar o mês, gerar uma parcela do dinheiro gasto
+				// i = eval(datual[1] - 1);
+				// iano = datual[2];
 
-				if (i < 1) {
-					i = 12;
-					iano = eval(datual[2] - 1);
-				}
+				// if (i < 1) {
+					// i = 12;
+					// iano = eval(datual[2] - 1);
+				// }
 
 				if (xdados[3 + c].replace("p", "") > 0 && xdados[3 + c].slice(-1) != "p") { // se houver um valor de compra avulsa
 					tmpdata.push(xdados[3 + c]);
 					xdados[3 + c] = "0.00p";
 					aqparc.push("1");
-					adparc.push("01/" + i + "/" + iano);
+					adparc.push("01/" + z.slice(1).join("/"));
 				}
+
+				z = z[0] + "/" + retornardatavalida(z.join("/"), 1).split("/").slice(1).join("/");
+				i[c / 5] = z;
+				xdados[13] = i.join("+");
 			} else if (datual[0] > 7 && xdados[3 + c].slice(-1) == "p") {
 				xdados[3 + c] = xdados[3 + c].slice(0, -1);
 			}
@@ -328,7 +361,7 @@
 			xdados = localStorage.getItem("dados");
 			
 			if (xdados == null) {
-				xdados = ("0.00;0.00;0.00;0.00;0.00;;;;0.00;0.00;;;;").split(";");
+				xdados = ("0.00;0.00;0.00;0.00;0.00;;;;0.00;0.00;;;;0+0").split(";");
 			} else {
 				xdados = xdados.split(";");
 				x = 14 - xdados.length;
@@ -363,6 +396,65 @@
 			}
 
 			document.getElementById("idnE").value = "R$ " + y.toFixed(2);
+		}
+	
+		function comparardatas(data01, data02) {
+			if (data01 != "") {
+				data01 = data01.split("/");
+				data01 = new Date(data01.slice(0,2).reverse().join("/") + "/" + data01[2]);
+			} else {
+				data01 = new Date();
+			}
+
+			data02 = data02.split("/");
+			// data02 = data02.split("/");
+			// data02[1] = eval(data02[1] + "+1") % 12;
+			
+			// if (data02[1] == 0) {
+				// data02[1] = 12;
+			// }
+			
+			// if (data02[1] == 1) {
+				// data02[2] = eval(data02[2] + "+1");
+			// }
+			
+			// if (data01.toISOString().slice(0, 10).split("-")[1] == 2 && data02[0] > 28) { // Se o dia for mais de 28 e o mês atual for Fevereiro, diminuir dia para se adequar ao fim do mês
+				// data02[0] -= eval(data02[0] - 28);
+			// } else if ("04060911".search(data01.toISOString().slice(0, 10).split("-")[1]) > -1 && data02[0] == 31) { // Diminui um dia se o dia for 31 e for um mês que tem somente 30 dias
+				// data02[0] -= 1;
+			// }
+			
+			data02 = new Date(data02.slice(0,2).reverse().join("/") + "/" + data02[2]);
+
+			if (data01.getTime() >= data02.getTime()) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		
+		function retornardatavalida(data1, meses) {
+			if (data1 == 0) {
+				data1 = new Date();
+				data1 = data1.toISOString().slice(0, 10).split("-").reverse();
+			} else {
+				data1 = data1.split("/");
+				data1[2] += parseInt(eval(data1[1] + meses) / 13); // Aumenta o ano se passar de 12 meses
+				data1[1] = eval(data1[1] + "+" + meses) % 12; // Colocar um mês válido. Novembro, cálculo abaixo
+	
+				if (data1[1] == 0) { // Se o cálculo cair no mês de Novembro
+					data1[1] = 12;
+				}
+				
+				if (data1[1] == 2 && data1[0] > 28) { // Se o dia for mais de 28 e o mês atual for Fevereiro, diminuir dia para se adequar ao fim do mês
+					data1[0] -= eval(data1[0] - 28);
+				} else if ("04060911".search(data1[1]) > -1 && data1[0] == 31) { // Diminui um dia se o dia for 31 e for um mês que tem somente 30 dias
+					data1[0] -= 1;
+				}
+			}
+			
+			return data1.join("/");
 		}
 	</script>
 </body>
